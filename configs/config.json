@@ -1,0 +1,8 @@
+{
+  "api_key": "RahasiaAPIKey123",
+  "ui_username": "admin",
+  "ui_password_hash": "bb77d0d3b3f239fa5db73bdf27b8d29a",
+  "data_dir": "data",
+  "db_path": "uploads.db",
+  "port": 8081
+}
