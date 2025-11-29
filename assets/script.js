@@ -1,6 +1,11 @@
 const API_URL = window.location.origin + "/api";
 const API_KEY_STORAGE = 'RahasiaAPIKey123';
 
+// Pagination variables
+let currentPage = 1;
+let itemsPerPage = 10;
+let allFiles = [];
+
 document.addEventListener('DOMContentLoaded', () => {
     // Cek apakah API Key sudah ada di Local Storage
     if (localStorage.getItem(API_KEY_STORAGE)) {
@@ -25,6 +30,18 @@ function showMainContainer() {
 
 function getAPIKey() {
     return localStorage.getItem(API_KEY_STORAGE);
+}
+
+// --- MODAL MANAGEMENT ---
+
+function openUploadModal() {
+    document.getElementById('upload-modal').classList.remove('hidden');
+    document.getElementById('file-input').value = ''; // Clear any previously selected file
+    document.getElementById('upload-status').textContent = '';
+}
+
+function closeUploadModal() {
+    document.getElementById('upload-modal').classList.add('hidden');
 }
 
 // --- AUTHENTIKASI ---
@@ -92,6 +109,7 @@ async function uploadFile() {
         if (response.ok) {
             showToast(`File berhasil diupload!`, 'success');
             listFiles(); // Refresh daftar setelah upload
+            closeUploadModal(); // Close modal after successful upload
             fileInput.value = ''; // Reset input file
         } else {
             showToast(`Gagal upload: ${result.message || 'Unknown error'}`, 'error');
@@ -127,79 +145,177 @@ async function listFiles() {
             throw new Error('Gagal memuat daftar file. API Key mungkin tidak valid.');
         }
 
-        const files = await response.json();
-        tbody.innerHTML = ''; // Kosongkan
-        
-        if (files.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-3 text-center">Tidak ada file yang ditemukan.</td></tr>';
-            return;
-        }
-
-        files.forEach(function(file) {
-            const row = tbody.insertRow();
-            
-            // Original filename cell
-            const originalNameCell = row.insertCell();
-            originalNameCell.className = 'px-4 py-3 text-sm text-gray-900';
-            originalNameCell.textContent = file.original_name;
-            
-            // Stored filename cell
-            const storedNameCell = row.insertCell();
-            storedNameCell.className = 'px-4 py-3 text-sm text-gray-900';
-            storedNameCell.textContent = file.stored_name;
-            
-            // Size cell
-            const sizeCell = row.insertCell();
-            sizeCell.className = 'px-4 py-3 text-sm text-gray-500';
-            sizeCell.textContent = formatFileSize(file.file_size);
-            
-            // Upload time cell
-            const timeCell = row.insertCell();
-            timeCell.className = 'px-4 py-3 text-sm text-gray-500';
-            // Format the upload time to be more readable
-            const uploadTime = new Date(file.upload_time);
-            timeCell.textContent = uploadTime.toLocaleString('id-ID');
-            
-            // Actions cell
-            const actionsCell = row.insertCell();
-            actionsCell.className = 'px-4 py-3 text-sm';
-            
-            // Preview button
-            const previewBtn = document.createElement('button');
-            previewBtn.textContent = '👁️';
-            previewBtn.className = 'text-green-600 hover:text-green-900 mr-3 font-medium';
-            previewBtn.title = 'Preview';
-            previewBtn.onclick = function() { previewFile(file.stored_name); };
-            actionsCell.appendChild(previewBtn);
-            
-            // Copy button
-            const copyBtn = document.createElement('button');
-            copyBtn.textContent = '📋';
-            copyBtn.className = 'text-yellow-600 hover:text-yellow-900 mr-3 font-medium';
-            copyBtn.title = 'Copy URL';
-            copyBtn.onclick = function() { copyFileUrl(file.stored_name); };
-            actionsCell.appendChild(copyBtn);
-            
-            // Download button
-            const downloadBtn = document.createElement('button');
-            downloadBtn.textContent = '⬇️';
-            downloadBtn.className = 'text-blue-600 hover:text-blue-900 mr-3 font-medium';
-            downloadBtn.title = 'Download';
-            downloadBtn.onclick = function() { downloadFile(file.stored_name); };
-            actionsCell.appendChild(downloadBtn);
-            
-            // Delete button
-            const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = '🗑️';
-            deleteBtn.className = 'text-red-600 hover:text-red-900 font-medium';
-            deleteBtn.title = 'Delete';
-            deleteBtn.onclick = function() { deleteFile(file.stored_name); };
-            actionsCell.appendChild(deleteBtn);
-        });
-
+        allFiles = await response.json();
+        currentPage = 1;
+        displayFiles();
     } catch (error) {
         tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-3 text-center text-red-500">Error: ' + error.message + '</td></tr>';
         console.error('List error:', error);
+    }
+}
+
+// Display files based on current page and items per page
+function displayFiles() {
+    const tbody = document.getElementById('file-list-body');
+    tbody.innerHTML = '';
+
+    // Calculate pagination
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, allFiles.length);
+    const filesToDisplay = allFiles.slice(startIndex, endIndex);
+
+    if (filesToDisplay.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-3 text-center">Tidak ada file yang ditemukan.</td></tr>';
+        updatePaginationInfo(0, 0, 0);
+        updatePaginationControls(1, 1);
+        return;
+    }
+
+    filesToDisplay.forEach(function(file) {
+        const row = tbody.insertRow();
+        
+        // Original filename cell
+        const originalNameCell = row.insertCell();
+        originalNameCell.className = 'px-4 py-3 text-sm text-gray-900';
+        originalNameCell.textContent = file.original_name;
+        
+        // Stored filename cell
+        const storedNameCell = row.insertCell();
+        storedNameCell.className = 'px-4 py-3 text-sm text-gray-900';
+        storedNameCell.textContent = file.stored_name;
+        
+        // Size cell
+        const sizeCell = row.insertCell();
+        sizeCell.className = 'px-4 py-3 text-sm text-gray-500';
+        sizeCell.textContent = formatFileSize(file.file_size);
+        
+        // Upload time cell
+        const timeCell = row.insertCell();
+        timeCell.className = 'px-4 py-3 text-sm text-gray-500';
+        // Format the upload time to be more readable
+        const uploadTime = new Date(file.upload_time);
+        timeCell.textContent = uploadTime.toLocaleString('id-ID');
+        
+        // Actions cell
+        const actionsCell = row.insertCell();
+        actionsCell.className = 'px-4 py-3 text-sm';
+        
+        // Preview button
+        const previewBtn = document.createElement('button');
+        previewBtn.textContent = '👁️';
+        previewBtn.className = 'text-green-600 hover:text-green-900 mr-3 font-medium';
+        previewBtn.title = 'Preview';
+        previewBtn.onclick = function() { previewFile(file.stored_name); };
+        actionsCell.appendChild(previewBtn);
+        
+        // Copy button
+        const copyBtn = document.createElement('button');
+        copyBtn.textContent = '📋';
+        copyBtn.className = 'text-yellow-600 hover:text-yellow-900 mr-3 font-medium';
+        copyBtn.title = 'Copy URL';
+        copyBtn.onclick = function() { copyFileUrl(file.stored_name); };
+        actionsCell.appendChild(copyBtn);
+        
+        // Download button
+        const downloadBtn = document.createElement('button');
+        downloadBtn.textContent = '⬇️';
+        downloadBtn.className = 'text-blue-600 hover:text-blue-900 mr-3 font-medium';
+        downloadBtn.title = 'Download';
+        downloadBtn.onclick = function() { downloadFile(file.stored_name); };
+        actionsCell.appendChild(downloadBtn);
+        
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '🗑️';
+        deleteBtn.className = 'text-red-600 hover:text-red-900 font-medium';
+        deleteBtn.title = 'Delete';
+        deleteBtn.onclick = function() { deleteFile(file.stored_name); };
+        actionsCell.appendChild(deleteBtn);
+    });
+
+    updatePaginationInfo(startIndex + 1, endIndex, allFiles.length);
+    updatePaginationControls(currentPage, Math.ceil(allFiles.length / itemsPerPage));
+}
+
+// Update pagination info text
+function updatePaginationInfo(start, end, total) {
+    document.getElementById('start-item').textContent = start;
+    document.getElementById('end-item').textContent = end;
+    document.getElementById('total-items').textContent = total;
+}
+
+// Update pagination controls
+function updatePaginationControls(currentPage, totalPages) {
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    
+    prevBtn.disabled = currentPage <= 1;
+    nextBtn.disabled = currentPage >= totalPages;
+    
+    // Create pagination numbers
+    const paginationNumbers = document.getElementById('pagination-numbers');
+    paginationNumbers.innerHTML = '';
+    
+    // Determine which page numbers to show
+    let startPage, endPage;
+    if (totalPages <= 5) {
+        startPage = 1;
+        endPage = totalPages;
+    } else {
+        if (currentPage <= 3) {
+            startPage = 1;
+            endPage = 5;
+        } else if (currentPage >= totalPages - 2) {
+            startPage = totalPages - 4;
+            endPage = totalPages;
+        } else {
+            startPage = currentPage - 2;
+            endPage = currentPage + 2;
+        }
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.textContent = i;
+        pageBtn.className = `px-3 py-1 rounded ${
+            i === currentPage 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 hover:bg-gray-300'
+        }`;
+        pageBtn.onclick = () => goToPage(i);
+        paginationNumbers.appendChild(pageBtn);
+    }
+}
+
+// Change items per page
+function changeItemsPerPage() {
+    itemsPerPage = parseInt(document.getElementById('items-per-page').value);
+    currentPage = 1;
+    displayFiles();
+}
+
+// Go to specific page
+function goToPage(page) {
+    if (page < 1 || page > Math.ceil(allFiles.length / itemsPerPage)) {
+        return;
+    }
+    currentPage = page;
+    displayFiles();
+}
+
+// Go to next page
+function goToNextPage() {
+    if (currentPage < Math.ceil(allFiles.length / itemsPerPage)) {
+        currentPage++;
+        displayFiles();
+    }
+}
+
+// Go to previous page
+function goToPrevPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        displayFiles();
     }
 }
 

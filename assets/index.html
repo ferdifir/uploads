@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>File Manager - ferdifir</title>
+    <title>File Manager - Sajihub</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css" />
@@ -11,7 +11,7 @@
   <body class="bg-gray-100 min-h-screen">
     <div class="container mx-auto px-4 py-8">
       <div id="login-container" class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg">
-        <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">File Manager Login</h2>
+        <h2 class="text-2xl font-bold text-center mb-6 text-gray-80">File Manager Login</h2>
         <div class="space-y-4">
           <div>
             <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
@@ -20,7 +20,7 @@
               id="username" 
               placeholder="Username" 
               value="admin" 
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-4 py-2 border border-gray-30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-50"
             />
           </div>
           <div>
@@ -30,7 +30,7 @@
               id="password" 
               placeholder="Password" 
               value="securepass" 
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-50"
             />
           </div>
           <button 
@@ -46,78 +46,139 @@
       <div id="main-container" class="hidden">
         <div class="flex justify-between items-center mb-8">
           <h1 class="text-3xl font-bold text-gray-800">File Manager Sederhana</h1>
-          <button 
-            id="logout-btn" 
-            onclick="logout()" 
-            class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
-          >
-            Logout
-          </button>
+          <div class="flex space-x-4">
+            <button 
+              id="upload-btn" 
+              onclick="openUploadModal()" 
+              class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
+            >
+              Upload File
+            </button>
+            <button 
+              id="logout-btn" 
+              onclick="logout()" 
+              class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
+            >
+              Logout
+            </button>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <!-- Upload Section -->
-          <div class="bg-white p-6 rounded-xl shadow-lg">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-              <span class="mr-2">📤</span> Upload File Baru
+        <!-- File List Section -->
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-gray-80 flex items-center">
+              <span class="mr-2">📄</span> Daftar File
             </h2>
-            <div class="space-y-4">
-              <div class="flex items-center justify-center w-full">
-                <label for="file-input" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                  <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                    <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                    </svg>
-                    <p class="mb-2 text-sm text-gray-500">
-                      <span class="font-semibold">Click to upload</span> or drag and drop
-                    </p>
-                    <p class="text-xs text-gray-500">SVG, PNG, JPG or GIF (MAX. 10MB)</p>
-                  </div>
-                  <input id="file-input" type="file" class="hidden" />
-                </label>
-              </div>
-              <div class="flex justify-between">
-                <button 
-                  onclick="uploadFile()" 
-                  class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
-                >
-                  Upload
-                </button>
-                <div id="upload-status" class="text-sm text-gray-600 self-center"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- File List Section -->
-          <div class="bg-white p-6 rounded-xl shadow-lg">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-semibold text-gray-800 flex items-center">
-                <span class="mr-2">📄</span> Daftar File
-              </h2>
+            <div class="flex space-x-4">
               <button 
                 onclick="listFiles()" 
                 class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
               >
                 Refresh
               </button>
-            </div>
-            <div class="overflow-x-auto">
-              <table id="file-list-table" class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Asli</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Tersimpan</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ukuran</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu Upload</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody id="file-list-body" class="bg-white divide-y divide-gray-200">
-                  <!-- File rows will be inserted here -->
-                </tbody>
-              </table>
+              <div class="flex items-center">
+                <label for="items-per-page" class="mr-2 text-sm text-gray-700">Items per page:</label>
+                <select id="items-per-page" onchange="changeItemsPerPage()" class="border border-gray-300 rounded px-2 py-1 text-sm">
+                  <option value="5">5</option>
+                  <option value="10" selected>10</option>
+                  <option value="20">20</option>
+                  <option value="50">50</option>
+                </select>
+              </div>
             </div>
           </div>
+          
+          <div class="overflow-x-auto">
+            <table id="file-list-table" class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Asli</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Tersimpan</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ukuran</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu Upload</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="file-list-body" class="bg-white divide-y divide-gray-200">
+                <!-- File rows will be inserted here -->
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Pagination -->
+          <div id="pagination-container" class="flex justify-between items-center mt-4">
+            <div id="pagination-info" class="text-sm text-gray-700">
+              Showing <span id="start-item">0</span> to <span id="end-item">0</span> of <span id="total-items">0</span> entries
+            </div>
+            <div class="flex space-x-2">
+              <button 
+                id="prev-page" 
+                onclick="goToPrevPage()" 
+                class="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                disabled
+              >
+                Previous
+              </button>
+              <div id="pagination-numbers" class="flex space-x-1">
+                <!-- Pagination numbers will be inserted here -->
+              </div>
+              <button 
+                id="next-page" 
+                onclick="goToNextPage()" 
+                class="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                disabled
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold text-gray-80">Upload File Baru</h3>
+          <button onclick="closeUploadModal()" class="text-gray-500 hover:text-gray-70">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="flex items-center justify-center w-full">
+            <label for="file-input" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-30 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+              <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                <p class="mb-2 text-sm text-gray-500">
+                  <span class="font-semibold">Click to upload</span> or drag and drop
+                </p>
+                <p class="text-xs text-gray-50">SVG, PNG, JPG or GIF (MAX. 10MB)</p>
+              </div>
+              <input id="file-input" type="file" class="hidden" />
+            </label>
+          </div>
+          <div class="flex justify-between">
+            <button 
+              onclick="closeUploadModal()" 
+              class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
+            >
+              Cancel
+            </button>
+            <button 
+              onclick="uploadFile()" 
+              class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
+            >
+              Upload
+            </button>
+          </div>
+          <div id="upload-status" class="text-sm text-gray-600 text-center"></div>
         </div>
       </div>
     </div>
