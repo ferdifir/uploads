@@ -8,7 +8,7 @@ set -e  # Exit on any error
 # Configuration
 REPO_URL="https://github.com/ferdifir/uploads.git"  # Update this with your actual repo URL
 PROJECT_NAME="uploads"
-DEPLOY_DIR="/opt/$PROJECT_NAME"
+DEPLOY_DIR="/var/www/$PROJECT_NAME"
 BINARY_NAME="file-manager"
 PORT=${PORT:-8081}  # Use PORT environment variable or default to 8081
 

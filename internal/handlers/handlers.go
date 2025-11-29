@@ -119,7 +119,7 @@ func (h *Handler) UploadFile(w http.ResponseWriter, r *http.Request) {
 	response := map[string]interface{}{
 		"message": fmt.Sprintf("File '%s' successfully uploaded.", newFilename),
 		"filename": newFilename,
-		"url": fmt.Sprintf("http://%s/file/%s", r.Host, newFilename),
+		"url": fmt.Sprintf("https://%s/file/%s", r.Host, newFilename),
 	}
 	
 	json.NewEncoder(w).Encode(response)
