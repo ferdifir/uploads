@@ -1,0 +1,37 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Build artifacts
+bin/
+build/
+_dist/
+
+# Runtime files
+*.db
+uploads.db
+*.log
+*.pid
+
+# Data directory (uploaded files)
+data/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment specific
+.env
+config.json
+
+# Deployment artifacts
+file-manager
